@@ -1,6 +1,6 @@
 #include "Calculator.h"
 
-bool Check_brackets(const char* str, size_t len) { // ГЏГ°Г®ГўГҐГ°ГЄГ  ГЇГ°Г ГўГЁГ«ГјГ­Г®Г±ГІГЁ Г°Г Г±Г±ГІГ Г­Г®ГўГЄГЁ Г±ГЄГ®ГЎГ®ГЄ
+bool Check_brackets(const char* str, size_t len) { // Проверка правильности расстановки скобок
     size_t count = 0, i = 0;
     Stack<char> brackets;
     while (i < len) {
@@ -16,8 +16,8 @@ bool Check_brackets(const char* str, size_t len) { // ГЏГ°Г®ГўГҐГ°ГЄГ  ГЇГ°Г ГўГ
     return !brackets.IsEmpty();
 }
 
-std::string parse_whitespace(std::string& input) {  // Г€Г§ГўГЎГ ГўГ«ГїГҐГ¬Г±Гї Г®ГІ ГЇГ°Г®ГЎГҐГ«Г®Гў Гў Г­Г Г·Г Г«ГҐ Г±ГІГ°Г®ГЄГЁ
-                                          // Г·ГІГ®ГЎГ» ГІГ®Г·Г­Г® Г®ГЇГ°ГҐГ¤ГҐГ«ГҐГ­ГЁГІГј ГўГ®Г§Г¬Г®Г¦Г­Г»Г© ГіГ­Г Г°Г­Г»Г© Г¬ГЁГ­ГіГ±
+std::string parse_whitespace(std::string& input) {  // Извбавляемся от пробелов в начале строки
+                                          // чтобы точно определенить возможный унарный минус
     size_t i = 0;
     while (input[i] == ' ') {
         i++;
@@ -31,13 +31,13 @@ std::string parse_whitespace(std::string& input) {  // Г€Г§ГўГЎГ ГўГ«ГїГҐГ¬Г±Гї 
 
 int get_priority(const std::string& token) {
     if (token == "(") return 0;
-    if (token == "+") return 1; // Г±Г«Г®Г¦ГҐГ­ГЁГҐ
-    if (token == "-") return 1; // Г°Г Г§Г­Г®Г±ГІГј
-    if (token == "*") return 2; // ГіГ¬Г­Г®Г¦ГҐГ­ГЁГҐ
-    if (token == "/") return 2; // Г¤ГҐГ«ГҐГ­ГЁГҐ
-    if (token == "%") return 2; // Г®Г±ГІГ ГІГ®ГЄ Г®ГІ Г¤ГҐГ«ГҐГ­ГЁГї
-    if (token == "^") return 3; // Г±ГІГҐГЇГҐГ­Гј 
-    return 4; // Г‚Г®Г§ГўГ°Г Г№Г ГҐГ¬ 4 ГҐГ±Г«ГЁ ГІГ®ГЄГҐГ­ -  ГЇГҐГ°ГґГЁГЄГ±Г­Г Гї Г®ГЇГҐГ°Г Г¶ГЁГї
+    if (token == "+") return 1; // сложение
+    if (token == "-") return 1; // разность
+    if (token == "*") return 2; // умножение
+    if (token == "/") return 2; // деление
+    if (token == "%") return 2; // остаток от деления
+    if (token == "^") return 3; // степень 
+    return 4; // Возвращаем 4 если токен -  перфиксная операция
 }
 
 bool Check_unary_minus(std::string& expr, size_t index) {
@@ -58,7 +58,7 @@ void Calculator::PrintExpression() {
    std:: cout << expr << std::endl;
 }
 
-void Calculator::Parse() { // ГЏГ Г°Г±ГҐГ° ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® ГўГ»Г°Г Г¦ГҐГ­ГЁГї, ГЄГ®ГІГ®Г°Г»ГҐ ГЇГ°ГҐГ®ГЎГ°Г Г§ГіГҐГІ ГҐГЈГ® Гў ГўГ»Г°Г Г¦ГҐГ­ГЁГҐ ГЇГ®Г«ГјГ±ГЄГ®Г© Г­Г®ГІГ Г¶ГЁГЁ
+void Calculator::Parse() { // Парсер исходного выражения, которые преобразует его в выражение польской нотации
     size_t i = 0;
     Stack<std::string> oper;
     std::string new_expr;
@@ -80,8 +80,7 @@ void Calculator::Parse() { // ГЏГ Г°Г±ГҐГ° ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® ГўГ»Г°Г Г¦ГҐГ­ГЁГї
         }
 
 
-        bool flag = true;
-       
+        bool flag = true;       
         for (std::string& t : tokens) {
             if (expr.find(t.c_str(), i) == i) {
                 //  expr += t.size();
@@ -89,7 +88,7 @@ void Calculator::Parse() { // ГЏГ Г°Г±ГҐГ° ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® ГўГ»Г°Г Г¦ГҐГ­ГЁГї
                 flag = false;
 
                 if (t == ")") {
-                    if (oper.Top() == "(") { // Г±Г¤ГҐГ«Г Г­Г® Г¤Г«Гї Г®ГЇГҐГ°Г Г¶ГЁГ© ГЇГ® ГІГЁГЇГі sin(const)...
+                    if (oper.Top() == "(") { // сделано для операций по типу sin(const)...
                         oper.Pop_Front();
                         new_expr += oper.Pop() + " ";
                         break;
@@ -125,27 +124,29 @@ void Calculator::Parse() { // ГЏГ Г°Г±ГҐГ° ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® ГўГ»Г°Г Г¦ГҐГ­ГЁГї
             }
 
         }
-        
-        for (std::string& c : Const) {
-            if (expr.find(c.c_str(), i) == i) {
-                flag = false;
-                i += c.size();
-                std::stringstream double_const;
-                std::string tmp_res;
-                if (c == "pi") {
-                    double_const << pi;
-                    double_const >> tmp_res;
-                    new_expr += tmp_res + " ";
+
+        if (flag) {
+            for (std::string& c : Const) {
+                if (expr.find(c.c_str(), i) == i) {
+                    flag = false;
+                    i += c.size();
+                    std::stringstream double_const;
+                    std::string tmp_res;
+                    if (c == "pi") {
+                        double_const << pi;
+                        double_const >> tmp_res;
+                        new_expr += tmp_res + " ";
+                    }
+                    else {
+                        double_const << exp;
+                        double_const >> tmp_res;
+                        new_expr += tmp_res + " ";
+                    }
+                    break;
                 }
-                else {
-                    double_const << exp;
-                    double_const >> tmp_res;
-                    new_expr += tmp_res + " ";
-                }
-                break;
             }
         }
-        
+
         if (flag) {
             throw std::invalid_argument("Unknown token!\n");
         }
@@ -162,7 +163,7 @@ void Calculator::Parse() { // ГЏГ Г°Г±ГҐГ° ГЁГ±ГµГ®Г¤Г­Г®ГЈГ® ГўГ»Г°Г Г¦ГҐГ­ГЁГї
 }
 
 
-double Calculator::Calculate() { // Г‚Г»Г·ГЁГ±Г«ГҐГ­ГЁГҐ ГўГ»Г°Г Г¦ГҐГ­ГЁГї
+double Calculator::Calculate() { // Вычисление выражения
     size_t i = 0;
     std::string res_in_stack;
     while (i < expr.size()) {
