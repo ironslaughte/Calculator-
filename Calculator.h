@@ -18,7 +18,7 @@ private:
     Stack<std::string> opers;
 public:
     Calculator() {
-        this->expr = "";
+        this->expr ="";
     }
     Calculator(std::string expr) {
         if (expr.size() == 0) {
@@ -28,6 +28,6 @@ public:
     }
     void ReadExpr();
     void Parse();
-    std::string GetExpression();
+    void PrintExpression();
     double Calculate();
 };

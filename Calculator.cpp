@@ -1,6 +1,6 @@
 #include "Calculator.h"
 
-bool Check_brackets(const char* str, size_t len) { // Ïðîâåðêà ïðàâèëüíîñòè ðàññòàíîâêè ñêîáîê
+bool Check_brackets(const char* str, size_t len) { // �������� ������������ ����������� ������
     size_t count = 0, i = 0;
     Stack<char> brackets;
     while (i < len) {
@@ -16,8 +16,8 @@ bool Check_brackets(const char* str, size_t len) { // Ïðîâåðêà ïðàâ�
     return !brackets.IsEmpty();
 }
 
-std::string parse_whitespace(std::string& input) {  // Èçâáàâëÿåìñÿ îò ïðîáåëîâ â íà÷àëå ñòðîêè
-                                          // ÷òîáû òî÷íî îïðåäåëåíèòü âîçìîæíûé óíàðíûé ìèíóñ
+std::string parse_whitespace(std::string& input) {  // ������������ �� �������� � ������ ������
+                                          // ����� ����� ������������ ��������� ������� �����
     size_t i = 0;
     while (input[i] == ' ') {
         i++;
@@ -30,23 +30,14 @@ std::string parse_whitespace(std::string& input) {  // Èçâáàâëÿåìñÿ 
 }
 
 int get_priority(const std::string& token) {
-    if (token == "+") return 1; // ñëîæåíèå
-    if (token == "-") return 1; // ðàçíîñòü
-    if (token == "*") return 2; // óìíîæåíèå
-    if (token == "/") return 2; // äåëåíèå
-    if (token == "%") return 2; // îñòàòîê îò äåëåíèÿ
-    if (token == "^") return 3; // ñòåïåíü
-    // Äàëåå ïðèîðèòåò ñàìûé âûñîêèé, òê íàì íóæíî âûòàùèòü ïðåôèêñíûå îïåðàöèè ñðàçó ïîñëå çàêðûòèÿ ñêîáîê ñ àðãóìåíòîì 
-    if (token == "sin") return 4;
-    if (token == "cos") return 4;
-    if (token == "log") return 4;
-    if (token == "ln") return 4;
-    if (token == "tg") return 4;
-    if (token == "ctg") return 4;
-    if (token == "exp") return 4;
-    if (token == "abs") return 4;
-    if (token == "sqrt") return 4;
-    return 0; // Âîçâðàùàåì 0 åñëè òîêåí - ýòî íå áèíàðíàÿ îïåðàöèÿ (íàïðèìåð ")")
+    if (token == "(") return 0;
+    if (token == "+") return 1; // ��������
+    if (token == "-") return 1; // ��������
+    if (token == "*") return 2; // ���������
+    if (token == "/") return 2; // �������
+    if (token == "%") return 2; // ������� �� �������
+    if (token == "^") return 3; // ������� 
+    return 4; // ���������� 4 ���� ����� -  ���������� ��������
 }
 
 bool Check_unary_minus(std::string& expr, size_t index) {
@@ -63,14 +54,14 @@ bool Check_unary_minus(std::string& expr, size_t index) {
     }
 }
 
-std::string Calculator::GetExpression() {
-   return expr;
+void Calculator::PrintExpression() {
+   std:: cout << expr << std::endl;
 }
 
-void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ, êîòîðûå ïðåîáðàçóåò åãî â âûðàæåíèå ïîëüñêîé íîòàöèè
+void Calculator::Parse() { // ������ ��������� ���������, ������� ����������� ��� � ��������� �������� �������
     size_t i = 0;
     Stack<std::string> oper;
-    std::string ss;
+    std::string new_expr;
 
     while (i < expr.size()) {
         if (isspace(expr[i])) {
@@ -84,7 +75,7 @@ void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ
                 i++;
             }
 
-            ss += number + " ";
+            new_expr += number + " ";
             continue;
         }
 
@@ -99,12 +90,12 @@ void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ
                 if (c == "pi") {
                     double_const << pi;
                     double_const >> tmp_res;
-                    ss += tmp_res + " ";
+                    new_expr += tmp_res + " ";
                 }
                 else {
                     double_const << exp;
                     double_const >> tmp_res;
-                    ss += tmp_res + " ";
+                    new_expr += tmp_res + " ";
                 }
                 break;
             }
@@ -117,13 +108,13 @@ void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ
                 flag = false;
 
                 if (t == ")") {
-                    if (oper.Top() == "(") { // ñäåëàíî äëÿ îïåðàöèé ïî òèïó sin(const)...
+                    if (oper.Top() == "(") { // ������� ��� �������� �� ���� sin(const)...
                         oper.Pop_Front();
-                        ss += oper.Pop() + " ";
+                        new_expr += oper.Pop() + " ";
                         break;
                     }
                     while ((oper.GetSize() > 0) && (oper.Top() != "(")) {
-                        ss += oper.Pop() + " ";
+                        new_expr += oper.Pop() + " ";
                     }
                     oper.Pop_Front();
                     break;
@@ -136,11 +127,11 @@ void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ
 
                 else {
                     if (t == "-" && Check_unary_minus(expr, i - t.size())) {
-                        ss += "0 ";
+                        new_expr += "0 ";
                     }
                     if (!oper.IsEmpty() && get_priority(oper.Top()) >= get_priority(t)) {
                         do {
-                            ss += oper.Pop() + " ";
+                            new_expr += oper.Pop() + " ";
                         } while (!oper.IsEmpty() && get_priority(oper.Top()) >= get_priority(t));
                         oper.Push(t);
                     }
@@ -162,14 +153,14 @@ void Calculator::Parse() { // Ïàðñåð èñõîäíîãî âûðàæåíèÿ
             oper.Pop_Front();
         }
         else {
-            ss += oper.Pop() + " ";
+            new_expr += oper.Pop() + " ";
         }
     }
-    this->expr = ss;
+    this->expr = new_expr;
 }
 
 
-double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
+double Calculator::Calculate() { // ���������� ���������
     size_t i = 0;
     std::string res_in_stack;
     while (i < expr.size()) {
@@ -200,11 +191,11 @@ double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
         if (expr[i] == '-') {
             i++;
 
-            double oper2 = strtod(values.Pop().c_str(), nullptr);
-            double oper1 = strtod(values.Pop().c_str(), nullptr);
-            oper1 -= oper2;
+            double value2 = strtod(values.Pop().c_str(), nullptr);
+            double value1 = strtod(values.Pop().c_str(), nullptr);
+            value1 -= value2;
             std::stringstream ss;
-            ss << oper1;
+            ss << value1;
             ss >> res_in_stack;
             values.Push(res_in_stack);
             res_in_stack = "";
@@ -223,14 +214,14 @@ double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
         }
         if (expr[i] == '/') {
             i++;
-            double oper2 = strtod(values.Pop().c_str(), nullptr);
-            if (oper2 == 0 || fabs(oper2) < 1e-5) {
+            double value2 = strtod(values.Pop().c_str(), nullptr);
+            if (value2 == 0 || fabs(value2) < 1e-5) {
                 throw std::invalid_argument("Division by zero!");
             }
-            double oper1 = strtod(values.Pop().c_str(), nullptr);
-            oper1 /= oper2;
+            double value1 = strtod(values.Pop().c_str(), nullptr);
+            value1 /= value2;
             std::stringstream ss;
-            ss << oper1;
+            ss << value1;
             ss >> res_in_stack;
             values.Push(res_in_stack);
             res_in_stack = "";
@@ -238,11 +229,11 @@ double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
         }
         if (expr[i] == '^') {
             i++;
-            double oper2 = strtod(values.Pop().c_str(), nullptr);
-            double oper1 = strtod(values.Pop().c_str(), nullptr);
-            oper1 = pow(oper1, oper2);
+            double value2 = strtod(values.Pop().c_str(), nullptr);
+            double value1 = strtod(values.Pop().c_str(), nullptr);
+            value1 = pow(value1, value2);
             std::stringstream ss;
-            ss << oper1;
+            ss << value1;
             ss >> res_in_stack;
             values.Push(res_in_stack);
             res_in_stack = "";
@@ -254,92 +245,92 @@ double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
                 i += t.size();
 
                 if (t == "sin") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    oper = sin(oper);
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    value = sin(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "cos") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    oper = cos(oper);
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    value = cos(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "tg") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    oper = tan(oper);
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    value = tan(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "ctg") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    if (tan(oper) == 0 || fabs(tan(oper)) < 1e-5) {
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    if (tan(value) == 0 || fabs(tan(value)) < 1e-5) {
                         throw std::invalid_argument("Division by zero!");
                     }
-                    oper = 1.0 / tan(oper);
+                    value = 1.0 / tan(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "log") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    if (oper <= 0) {
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    if (value <= 0) {
                         throw std::invalid_argument("Invalid arg in log");
                     }
-                    oper = log10(oper);
+                    value = log10(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "ln") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    if (oper <= 0) {
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    if (value <= 0) {
                         throw std::invalid_argument("Invalid arg in ln");
                     }
-                    oper = log(oper);                   
+                    value = log(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "abs") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    oper = fabs(oper);
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    value = fabs(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
                 }
 
                 if (t == "sqrt") {
-                    double oper = strtod(values.Pop().c_str(), nullptr);
-                    if (oper < 0) {
+                    double value = strtod(values.Pop().c_str(), nullptr);
+                    if (value < 0) {
                         throw std::invalid_argument("Invalid arg in sqrt");
                     }
-                    oper = sqrt(oper);
+                    value = sqrt(value);
                     std::stringstream ss;
-                    ss << oper;
+                    ss << value;
                     ss >> res_in_stack;
                     values.Push(res_in_stack);
                     res_in_stack = "";
@@ -358,7 +349,7 @@ void Calculator::ReadExpr() {
         throw std::invalid_argument("Syntax error\n");
     }
     expr = parse_whitespace(expr);
-    if (expr.length() == 0) {
-        throw std::invalid_argument("Expression in empty");
+    if (expr.size() == 0) {
+        throw std::invalid_argument("Expression is empty");
     }
 }
