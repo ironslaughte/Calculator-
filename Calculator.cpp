@@ -334,7 +334,7 @@ double Calculator::Calculate() { // Âû÷èñëåíèå âûðàæåíèÿ
 
                 if (t == "sqrt") {
                     double oper = strtod(values.Pop().c_str(), nullptr);
-                    if (oper <= 0) {
+                    if (oper < 0) {
                         throw std::invalid_argument("Invalid arg in sqrt");
                     }
                     oper = sqrt(oper);
