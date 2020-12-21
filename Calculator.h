@@ -1,11 +1,12 @@
 #pragma once
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include "stack.h"
 #include <stdlib.h>
 
 #define pi 3.14159265358979323846
-#define exp 2.71828182845904523536
+#define Exp 2.71828182845904523536
 
 std::string tokens[] = { "+", "-","(", ")","*", "/","sqrt","sin","cos","abs","exp","log","ln","tg","ctg", "^", "%" };
 
@@ -18,7 +19,7 @@ private:
     Stack<std::string> opers;
 public:
     Calculator() {
-        this->expr ="";
+        this->expr = "";
     }
     Calculator(std::string expr) {
         if (expr.size() == 0) {
@@ -28,6 +29,6 @@ public:
     }
     void ReadExpr();
     void Parse();
-    void PrintExpression();
+    std::string GetExpression();
     double Calculate();
 };
