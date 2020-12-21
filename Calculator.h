@@ -22,7 +22,7 @@ public:
     }
     Calculator(std::string expr) {
         if (expr.size() == 0) {
-            throw std::invalid_argument("Expression is empy");
+            throw std::invalid_argument("Expression is empty");
         }
         this->expr = expr;
     }
